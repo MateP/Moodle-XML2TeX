@@ -14,4 +14,5 @@ Scripts for converting between MoodleXML question format and LaTeX
 `tex2xml.py <filename> [-e] [-F]`
 
 -e	uses English instead of Croatian feedback
+
 -F	overwrites the output file in case it exits
