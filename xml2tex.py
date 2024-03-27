@@ -137,11 +137,16 @@ def main(XML_FILE, NEW_TEX_FILE):
 
 
 if __name__ == "__main__":
-	if len(sys.argv) not in [2,3]:
+	if len(sys.argv) < 2:
 		print(f"Usage: {sys.argv[0]} <filename> [-F]")
 		sys.exit(1)
 
 	XML_FILE = sys.argv[1]
+
+	options = []
+	for arg in sys.argv[2:]:
+		if arg.startswith("-"):
+			options.extend(arg[1:])
 
 	if not os.path.exists(XML_FILE):
 		print(f"Error: File '{XML_FILE}' not found.")
@@ -149,7 +154,7 @@ if __name__ == "__main__":
 	
 	NEW_TEX_FILE = os.path.splitext(XML_FILE)[0] + '.tex'
 
-	FORCE = len(sys.argv)==3 and sys.argv[2]=='-F'
+	FORCE = 'F' in options
 
 	if os.path.exists(NEW_TEX_FILE) and not FORCE:
 		print(f"Error: File '{NEW_TEX_FILE}' already exists.")

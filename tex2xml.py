@@ -121,8 +121,8 @@ QUESTION_TEMPLATE_PT2_EN = r"""		</questiontext>
 
 """
 
-def main(FILE, NEW_TEX_FILE, NEW_XML_FILE,EN):
-	with open(FILE) as f:
+def main(TEX_FILE, NEW_TEX_FILE, NEW_XML_FILE,EN):
+	with open(TEX_FILE) as f:
 		TEX = f.read()
 
 	TEX = re.sub(r'(?<!\\)\$\$(.*?)(?<!\\)\$\$',r'\\[ \1 \\]', TEX, flags=re.S)
@@ -190,19 +190,19 @@ if __name__ == "__main__":
 		print(f"Usage: {sys.argv[0]} <filename> [-e] [-F]")
 		sys.exit(1)
 
-	FILE = sys.argv[1]
+	TEX_FILE = sys.argv[1]
 	
 	options = []
 	for arg in sys.argv[2:]:
 		if arg.startswith("-"):
 			options.extend(arg[1:])
 
-	if not os.path.exists(FILE):
-		print(f"Error: File '{FILE}' not found.")
+	if not os.path.exists(TEX_FILE):
+		print(f"Error: File '{TEX_FILE}' not found.")
 		sys.exit(1)
 	
-	NEW_TEX_FILE = os.path.splitext(FILE)[0] + '_new.tex'
-	NEW_XML_FILE = os.path.splitext(FILE)[0] + '.xml'
+	NEW_TEX_FILE = os.path.splitext(TEX_FILE)[0] + '_new.tex'
+	NEW_XML_FILE = os.path.splitext(TEX_FILE)[0] + '.xml'
 
 	FORCE = 'F' in options
 	EN = 'e' in options
@@ -215,4 +215,4 @@ if __name__ == "__main__":
 		print(f"Error: File '{NEW_XML_FILE}' already exists.")
 		sys.exit(1)
 
-	main(FILE, NEW_TEX_FILE, NEW_XML_FILE, EN)
+	main(TEX_FILE, NEW_TEX_FILE, NEW_XML_FILE, EN)
