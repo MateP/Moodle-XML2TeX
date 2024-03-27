@@ -5,121 +5,128 @@ import re
 import os
 import base64
 import sys
+import lxml.etree as et
 
-HEADER = r"""<?xml version="1.0" encoding="UTF-8"?>
-<quiz>
 
-"""
-END = r"""</quiz>
-"""
-QUESTION_TEMPLATE_PT1 = r"""	<question type="multichoice">
-		<name>
-			<text>QUESTION_NAME</text>
-		</name>
-		<questiontext format="html">
-			<text><![CDATA[QUESTION_TEXT]]></text>
-"""
-BASE64_IMAGE_TEMPLATE = r"""			<file name="IMAGE_NAME" path="/" encoding="base64">BASE64_IMAGE_CONTENT</file>
-"""
-QUESTION_TEMPLATE_PT2 = r"""		</questiontext>
-		<generalfeedback format="html">
-			<text><![CDATA[GENERAL_FEEDBACK]]></text>
-		</generalfeedback>
-		<defaultgrade>1.0000000</defaultgrade>
-		<penalty>0.3333333</penalty>
-		<hidden>0</hidden>
-		<idnumber></idnumber>
-		<single>true</single>
-		<shuffleanswers>true</shuffleanswers>
-		<answernumbering>none</answernumbering>
-		<showstandardinstruction>1</showstandardinstruction>
-		<correctfeedback format="html">
-			<text><![CDATA[<p>Vaš odgovor je točan.</p>]]></text>
-		</correctfeedback>
-		<partiallycorrectfeedback format="html">
-			<text><![CDATA[<p>Vaš odgovor je djelomično točan.</p>]]></text>
-		</partiallycorrectfeedback>
-		<incorrectfeedback format="html">
-			<text><![CDATA[<p>Vaš odgovor nije točan.</p>]]></text>
-		</incorrectfeedback>
-		<shownumcorrect/>
-		<answer fraction="100" format="html">
-			<text><![CDATA[<p>CORRECT_ANSWER</p>]]></text>
-			<feedback format="html">
-				<text></text>
-			</feedback>
-		</answer>
-		<answer fraction="0" format="html">
-			<text><![CDATA[<p>FALSE_ANSWER_1</p>]]></text>
-			<feedback format="html">
-				<text></text>
-			</feedback>
-		</answer>
-		<answer fraction="0" format="html">
-			<text><![CDATA[<p>FALSE_ANSWER_2</p>]]></text>
-			<feedback format="html">
-				<text></text>
-			</feedback>
-		</answer>
-		<answer fraction="0" format="html">
-			<text><![CDATA[<p>FALSE_ANSWER_3</p>]]></text>
-			<feedback format="html">
-				<text></text>
-			</feedback>
-		</answer>
-	</question>
+def question_element(count, Ime_zadatka, Text_zadatka, Slike, Feedback, Answers, EN):
+	question = et.Element('question', type="multichoice")
 
-"""
 
-QUESTION_TEMPLATE_PT2_EN = r"""		</questiontext>
-		<generalfeedback format="html">
-			<text><![CDATA[GENERAL_FEEDBACK]]></text>
-		</generalfeedback>
-		<defaultgrade>1.0000000</defaultgrade>
-		<penalty>0.3333333</penalty>
-		<hidden>0</hidden>
-		<idnumber></idnumber>
-		<single>true</single>
-		<shuffleanswers>true</shuffleanswers>
-		<answernumbering>none</answernumbering>
-		<showstandardinstruction>1</showstandardinstruction>
-		<correctfeedback format="html">
-			<text><![CDATA[<p>Your answer is correct.</p>]]></text>
-		</correctfeedback>
-		<partiallycorrectfeedback format="html">
-			<text><![CDATA[<p>Your answer is partially correct.</p>]]></text>
-		</partiallycorrectfeedback>
-		<incorrectfeedback format="html">
-			<text><![CDATA[<p>Your answer is incorrect.</p>]]></text>
-		</incorrectfeedback>
-		<shownumcorrect/>
-		<answer fraction="100" format="html">
-			<text><![CDATA[<p>CORRECT_ANSWER</p>]]></text>
-			<feedback format="html">
-				<text></text>
-			</feedback>
-		</answer>
-		<answer fraction="0" format="html">
-			<text><![CDATA[<p>FALSE_ANSWER_1</p>]]></text>
-			<feedback format="html">
-				<text></text>
-			</feedback>
-		</answer>
-		<answer fraction="0" format="html">
-			<text><![CDATA[<p>FALSE_ANSWER_2</p>]]></text>
-			<feedback format="html">
-				<text></text>
-			</feedback>
-		</answer>
-		<answer fraction="0" format="html">
-			<text><![CDATA[<p>FALSE_ANSWER_3</p>]]></text>
-			<feedback format="html">
-				<text></text>
-			</feedback>
-		</answer>
-	</question>
+	name = et.Element('name')
+	text = et.Element('text')
+	text.text = f'{count:03} {Ime_zadatka}'
+	name.append(text)
 
-"""
+	question.append(name)
+
+
+	questiontext = et.Element('questiontext', format="html")
+	text = et.Element('text')
+	text.text = et.CDATA(Text_zadatka)
+	questiontext.append(text)
+
+	for slika in Slike:
+		with open(slika, 'rb') as f:
+			img64_data = base64.b64encode(f.read())
+
+			file = et.Element('file', name=f"{slika}", path="/", encoding="base64")
+			file.text = img64_data
+			questiontext.append(file)
+
+	question.append(questiontext)
+
+
+	generalfeedback = et.Element('generalfeedback', format="html")
+	text = et.Element('text')
+	text.text = et.CDATA(Feedback)
+	generalfeedback.append(text)
+
+	question.append(generalfeedback)
+
+	defaultgrade = et.Element('defaultgrade')
+	defaultgrade.text = '1.0000000'
+	question.append(defaultgrade)
+
+	penalty = et.Element('penalty')
+	penalty.text = '0.3333333'
+	question.append(penalty)
+
+	hidden = et.Element('hidden')
+	hidden.text = '0'
+	question.append(hidden)
+
+	question.append(et.Element('idnumber'))
+
+	single = et.Element('single')
+	single.text = 'true'
+	question.append(single)
+
+	shuffleanswers = et.Element('shuffleanswers')
+	shuffleanswers.text = 'true'
+	question.append(shuffleanswers)
+
+	answernumbering = et.Element('answernumbering')
+	answernumbering.text = 'none'
+	question.append(answernumbering)
+
+	showstandardinstruction = et.Element('showstandardinstruction')
+	showstandardinstruction.text = '1'
+	question.append(showstandardinstruction)
+
+	correctfeedback = et.Element('correctfeedback', format="html")
+	text = et.Element('text')
+	if EN:
+		text.text = et.CDATA('<p>Your answer is correct.</p>')
+	else:
+		text.text = et.CDATA('<p>Vaš odgovor je točan.</p>')
+	correctfeedback.append(text)
+	question.append(correctfeedback)
+
+	partiallycorrectfeedback = et.Element('partiallycorrectfeedback', format="html")
+	text = et.Element('text')
+	if EN:
+		text.text = et.CDATA('<p>Your answer is partially correct.</p>')
+	else:
+		text.text = et.CDATA('<p>Vaš odgovor je djelomično točan.</p>')
+	partiallycorrectfeedback.append(text)
+	question.append(partiallycorrectfeedback)
+
+	incorrectfeedback = et.Element('incorrectfeedback', format="html")
+	text = et.Element('text')
+	if EN:
+		text.text = et.CDATA('<p>Your answer is incorrect.</p>')
+	else:
+		text.text = et.CDATA('<p>Vaš odgovor nije točan.</p>')
+	incorrectfeedback.append(text)
+	question.append(incorrectfeedback)
+
+	question.append(et.Element('shownumcorrect'))
+
+	answer = et.Element('answer', fraction="100", format="html")
+	text = et.Element('text')
+	text.text = et.CDATA(f'<p>{Answers[0]}</p>')
+	answer.append(text)
+	feedback = et.Element('feedback', format="html")
+	text = et.Element('text')
+	feedback.append(text)
+	answer.append(feedback)
+	question.append(answer)
+
+
+	for ans in Answers[1:]:
+		answer = et.Element('answer', fraction="0", format="html")
+		text = et.Element('text')
+		text.text = et.CDATA(f'<p>{ans}</p>')
+		answer.append(text)
+		feedback = et.Element('feedback', format="html")
+		text = et.Element('text')
+		feedback.append(text)
+		answer.append(feedback)
+		question.append(answer)
+
+
+	return question
+
 
 def main(TEX_FILE, NEW_TEX_FILE, NEW_XML_FILE,EN):
 	with open(TEX_FILE) as f:
@@ -136,13 +143,14 @@ def main(TEX_FILE, NEW_TEX_FILE, NEW_XML_FILE,EN):
 
 	matches = re.findall(r'\\begin\{problem\}\[(.*?)\](.*?)\\end\{problem\}', TEX, flags=re.S)
 
-	OUTPUT = HEADER
+	root = et.Element('quiz')
+
 	problems = []
 	i=0
 	for Ime_zadatka,problem_all in matches:
 		i+=1
-		options = re.findall(r'\\begin\{options\}.*?\\item(.*?)\\item(.*?)\\item(.*?)\\item(.*?)\\end\{options\}', problem_all, flags=re.S)[0]
-		Answer1, Answer2, Answer3, Answer4 = options
+		options_env = re.findall(r'\\begin\{options\}(.*?)\\end\{options\}', problem_all, flags=re.S)[0]
+		options = [opt.strip() for opt in options_env.split('\\item') if opt.strip() != '']
 		Slike = re.findall(r'\\begin\{slika\}.*?\\includegraphics\{(.*?)\}.*?\\end\{slika\}', problem_all, flags=re.S)
 
 		Text_zadatka = r'<p>' + re.findall(r'(.*?)\\begin\{options\}', problem_all, flags=re.S)[0].strip() + r'</p>'
@@ -157,32 +165,17 @@ def main(TEX_FILE, NEW_TEX_FILE, NEW_XML_FILE,EN):
 		
 		Ime_zadatka = Ime_zadatka.strip()
 		Text_zadatka = Text_zadatka.strip()
-		Answer1 = Answer1.strip()
-		Answer2 = Answer2.strip()
-		Answer3 = Answer3.strip()
-		Answer4 = Answer4.strip()
+		Answers = [ans.strip() for ans in options]
 		Feedback = Feedback.strip()
 
-		problems.append(dict(Ime_zadatka=Ime_zadatka, Text_zadatka=Text_zadatka, Answers = [Answer1, Answer2, Answer3, Answer4], Feedback=Feedback))
+		problems.append(dict(Ime_zadatka=Ime_zadatka, Text_zadatka=Text_zadatka, Answers = Answers, Feedback=Feedback))
 
-		OUTPUT += r"""<!-- question: """ + str(i) + r"""	-->
-		"""
+		root.append(et.Comment(f'question: {i:03}'))
 
-		OUTPUT += QUESTION_TEMPLATE_PT1.replace('QUESTION_NAME', f'{i:03} {Ime_zadatka}').replace('QUESTION_TEXT', Text_zadatka)
-		for slika in Slike:
-			with open(slika, 'rb') as f:
-				img64_data = base64.b64encode(f.read())
-			OUTPUT += BASE64_IMAGE_TEMPLATE.replace('IMAGE_NAME', slika).replace('BASE64_IMAGE_CONTENT',img64_data.decode('utf-8'))
+		root.append(question_element(i, Ime_zadatka, Text_zadatka, Slike, Feedback, Answers, EN))
 
-		if EN:
-			OUTPUT += QUESTION_TEMPLATE_PT2_EN.replace('GENERAL_FEEDBACK', Feedback).replace('CORRECT_ANSWER', Answer1).replace('FALSE_ANSWER_1', Answer2).replace('FALSE_ANSWER_2', Answer3).replace('FALSE_ANSWER_3', Answer4)
-		else:
-			OUTPUT += QUESTION_TEMPLATE_PT2.replace('GENERAL_FEEDBACK', Feedback).replace('CORRECT_ANSWER', Answer1).replace('FALSE_ANSWER_1', Answer2).replace('FALSE_ANSWER_2', Answer3).replace('FALSE_ANSWER_3', Answer4)
-
-	OUTPUT += END
-
-	with open(NEW_XML_FILE,'w') as f:
-		f.write(OUTPUT)
+	T = et.ElementTree(root)
+	T.write(NEW_XML_FILE,encoding='utf-8',xml_declaration=True, pretty_print=True)
 
 
 if __name__ == "__main__":
