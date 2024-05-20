@@ -18,7 +18,7 @@ TEX_BEGIN = r"""% !TeX encoding = UTF-8
 \usepackage{amsthm}
 \usepackage[margin=2cm]{geometry}
 
-\title{KPZ 1}
+\title{KPZ}
 
 \theoremstyle{definition}
 \newtheorem{problem}{Zadatak}

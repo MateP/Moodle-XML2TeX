@@ -141,13 +141,13 @@ def main(TEX_FILE, NEW_TEX_FILE, NEW_XML_FILE,EN):
 	with open(NEW_TEX_FILE,'w') as f:
 		f.write(TEX)
 
-	matches = re.findall(r'\\begin\{problem\}\[(.*?)\](.*?)\\end\{problem\}', TEX, flags=re.S)
+	matches = re.findall(r'\\begin\{problem\}(\[(.*?)\])?(.*?)\\end\{problem\}', TEX, flags=re.S)
 
 	root = et.Element('quiz')
 
 	problems = []
 	i=0
-	for Ime_zadatka,problem_all in matches:
+	for _,Ime_zadatka,problem_all in matches:
 		i+=1
 		options_env = re.findall(r'\\begin\{options\}(.*?)\\end\{options\}', problem_all, flags=re.S)[0]
 		options = [opt.strip() for opt in options_env.split('\\item') if opt.strip() != '']
