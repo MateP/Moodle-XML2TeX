@@ -138,8 +138,9 @@ def main(TEX_FILE, NEW_TEX_FILE, NEW_XML_FILE,EN):
 	TEX = re.sub(r'<',r' < ', TEX)
 	TEX = re.sub(r'>',r' > ', TEX)
 
-	with open(NEW_TEX_FILE,'w') as f:
-		f.write(TEX)
+	if NEW_TEX_FILE is not None:
+		with open(NEW_TEX_FILE,'w') as f:
+			f.write(TEX)
 
 	matches = re.findall(r'\\begin\{problem\}(\[(.*?)\])?(.*?)\\end\{problem\}', TEX, flags=re.S)
 
@@ -180,7 +181,7 @@ def main(TEX_FILE, NEW_TEX_FILE, NEW_XML_FILE,EN):
 
 if __name__ == "__main__":
 	if len(sys.argv) < 2:
-		print(f"Usage: {sys.argv[0]} <filename> [-e] [-F]")
+		print(f"Usage: {sys.argv[0]} <filename> [-e] [-F] [-t]")
 		sys.exit(1)
 
 	TEX_FILE = sys.argv[1]
@@ -199,13 +200,18 @@ if __name__ == "__main__":
 
 	FORCE = 'F' in options
 	EN = 'e' in options
+	TMP = 't' in options
 
-	if os.path.exists(NEW_TEX_FILE) and not FORCE:
+	if os.path.exists(NEW_TEX_FILE) and TMP and not FORCE:
 		print(f"Error: File '{NEW_TEX_FILE}' already exists.")
 		sys.exit(1)
 
 	if os.path.exists(NEW_XML_FILE) and not FORCE:
 		print(f"Error: File '{NEW_XML_FILE}' already exists.")
 		sys.exit(1)
+
+
+	if not TMP:
+		NEW_TEX_FILE = None
 
 	main(TEX_FILE, NEW_TEX_FILE, NEW_XML_FILE, EN)
